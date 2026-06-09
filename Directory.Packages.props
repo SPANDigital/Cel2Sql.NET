@@ -27,7 +27,7 @@
     <PackageVersion Include="Npgsql" Version="8.0.5" />
     <PackageVersion Include="MySqlConnector" Version="2.3.7" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.10" />
-    <PackageVersion Include="DuckDB.NET.Data.Full" Version="1.1.1" />
+    <PackageVersion Include="DuckDB.NET.Data.Full" Version="1.5.3" />
   </ItemGroup>
 
   <!-- Pin the transitive System.Drawing.Common to a patched version (Cel.NET pulls 4.7.0 which has GHSA-rxg9-xrhp-64gj). -->
