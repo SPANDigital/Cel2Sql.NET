@@ -8,7 +8,7 @@
   <ItemGroup>
     <!-- CEL parser/checker (port of cel-java). Pinned: the adapter depends on its AST shape. -->
     <PackageVersion Include="Cel.NET" Version="1.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>
 
