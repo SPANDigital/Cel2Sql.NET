@@ -1,3 +1,4 @@
+using System.Linq;
 using Cel;
 using Cel.Checker;
 using Cel2Sql.Errors;
@@ -45,6 +46,19 @@ public sealed class CelEnvironmentBuilder
     public CelEnvironmentBuilder AddVariable(string name, CelVarType type)
     {
         _decls.Add(Decls.NewVar(name, type.Proto));
+        return this;
+    }
+
+    /// <summary>
+    /// Declares a member (receiver-style) function: <c>target.name(args...)</c>.
+    /// The first element of <paramref name="argTypes"/> is the receiver type.
+    /// </summary>
+    public CelEnvironmentBuilder AddMemberFunction(
+        string name, string overloadId, CelVarType resultType, params CelVarType[] argTypes)
+    {
+        var protoArgs = argTypes.Select(a => a.Proto).ToList();
+        var overload = Decls.NewInstanceOverload(overloadId, protoArgs, resultType.Proto);
+        _decls.Add(Decls.NewFunction(name, new[] { overload }));
         return this;
     }
 
