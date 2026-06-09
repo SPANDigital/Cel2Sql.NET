@@ -27,7 +27,7 @@ public sealed class CelEnvironment
     public CelAst Compile(string celExpr)
     {
         var result = _env.Compile(celExpr);
-        if (result.Issues != null && result.Issues.HasIssues())
+        if (result.Ast == null || (result.Issues != null && result.Issues.HasIssues()))
         {
             throw ConversionException.Of(
                 "Failed to compile CEL expression",
