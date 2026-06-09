@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish to NuGet.org
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag format
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid tag format. Expected vX.Y.Z or vX.Y.Z-qualifier, got v${TAG}"
+            exit 1
+          fi
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+          if [[ "$TAG" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Unit tests
+        run: dotnet test test/Cel2Sql.Tests/Cel2Sql.Tests.csproj -c Release
+
+      - name: Pack
+        run: >
+          dotnet pack src/Cel2Sql/Cel2Sql.csproj
+          -c Release
+          -p:Version=${{ steps.version.outputs.version }}
+          -o artifacts
+
+      - name: Push to NuGet.org
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --api-key "${{ secrets.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}

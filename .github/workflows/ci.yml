@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+
+      - name: Unit tests
+        run: >
+          dotnet test test/Cel2Sql.Tests/Cel2Sql.Tests.csproj
+          -c Release --no-build
+          --logger "trx;LogFileName=unit.trx"
+          --results-directory artifacts/test-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: artifacts/test-results/
+          retention-days: 14
+
+  integration-test:
+    name: Integration Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Integration tests (Testcontainers + embedded)
+        run: >
+          dotnet test test/Cel2Sql.IntegrationTests/Cel2Sql.IntegrationTests.csproj
+          -c Release
+          --logger "trx;LogFileName=integration.trx"
+          --results-directory artifacts/integration-results
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: artifacts/integration-results/
+          retention-days: 14
