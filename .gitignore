@@ -1,0 +1,20 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+artifacts/
+*.nupkg
+*.snupkg
+[Tt]est[Rr]esults/
+*.trx
+project.lock.json
+
+## Rider / IDE
+.idea/
+*.DotSettings.user
+
+## OS
+.DS_Store
+Thumbs.db

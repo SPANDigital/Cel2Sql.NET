@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Cel2Sql/Cel2Sql.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Cel2Sql.Tests/Cel2Sql.Tests.csproj" />
+  </Folder>
+</Solution>
