@@ -11,7 +11,7 @@ public class Cel2SqlOperatorTest
 {
     public static IEnumerable<object[]> OperatorCases()
     {
-        // Uniform across dialects.
+        // Uniform across all five SQL dialects.
         var uniform = new (string Name, string Cel, string Sql)[]
         {
             ("logical_and", "name == \"a\" && age > 20", "name = 'a' AND age > 20"),
@@ -27,10 +27,20 @@ public class Cel2SqlOperatorTest
             ("modulo", "5 % 3 == 2", "5 % 3 = 2"),
         };
         foreach (var (name, cel, sql) in uniform)
-            yield return new object[] { name, cel, TestDialects.PostgreSql, sql };
+            foreach (var dialect in TestDialects.FiveSqlDialects)
+                yield return new object[] { name, cel, dialect, sql };
 
-        // String concat: PostgreSQL uses ||.
-        yield return new object[] { "string_concat", "\"a\" + \"b\" == \"ab\"", TestDialects.PostgreSql, "'a' || 'b' = 'ab'" };
+        // String concatenation: MySQL uses CONCAT(), others use ||.
+        var concatByDialect = new (string Dialect, string Sql)[]
+        {
+            (TestDialects.PostgreSql, "'a' || 'b' = 'ab'"),
+            (TestDialects.MySql, "CONCAT('a', 'b') = 'ab'"),
+            (TestDialects.Sqlite, "'a' || 'b' = 'ab'"),
+            (TestDialects.DuckDb, "'a' || 'b' = 'ab'"),
+            (TestDialects.BigQuery, "'a' || 'b' = 'ab'"),
+        };
+        foreach (var (dialect, sql) in concatByDialect)
+            yield return new object[] { "string_concat", "\"a\" + \"b\" == \"ab\"", dialect, sql };
     }
 
     [Theory]

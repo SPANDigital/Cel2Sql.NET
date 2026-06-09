@@ -40,7 +40,7 @@ public class Cel2SqlBasicTest
     public static IEnumerable<object[]> BasicCases()
     {
         foreach (var (name, cel, sql) in Cases)
-            foreach (var dialect in TestDialects.Available)
+            foreach (var dialect in TestDialects.FiveSqlDialects)
                 yield return new object[] { name, cel, dialect, sql };
     }
 

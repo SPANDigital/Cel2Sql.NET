@@ -1,4 +1,5 @@
 using Cel2Sql.Cel;
+using Cel2Sql.Dialects.BigQuery;
 using Cel2Sql.Dialects.Postgres;
 using Cel2Sql.Errors;
 using FluentAssertions;
@@ -10,7 +11,7 @@ namespace Cel2Sql.Tests;
 /// Tests for the convert options ported from upstream cel2sql v3.7.1:
 /// withJsonVariables, withColumnAliases, withParamStartIndex,
 /// plus byte-array length cap and the CEL format() string function.
-/// Mirrors Cel2SqlOptionsTest.java (PostgreSQL rows only).
+/// Mirrors Cel2SqlOptionsTest.java.
 /// </summary>
 public class Cel2SqlOptionsTest
 {
@@ -79,6 +80,16 @@ public class Cel2SqlOptionsTest
             .WithParamStartIndex(5));
         res.Sql.Should().Be("name = $5 AND age > $6");
         res.Parameters.Should().Equal(new object?[] { "Alice", 21L });
+    }
+
+    [Fact]
+    public void ParamStartIndex_BigqueryShiftsPlaceholders()
+    {
+        var ast = CelTestEnv.Compile("name == \"Alice\"");
+        var res = Cel2SqlConverter.ConvertParameterized(ast, o => o
+            .WithDialect(new BigQueryDialect())
+            .WithParamStartIndex(7));
+        res.Sql.Should().Be("name = @p7");
     }
 
     [Fact]
@@ -156,18 +167,30 @@ public class Cel2SqlOptionsTest
     public static IEnumerable<object[]> FormatCases()
     {
         // Postgres FORMAT collapses %d/%f to %s for safe coercion.
-        yield return new object[] { "format_string_int", "\"%s is %d\".format([\"John\", 30])", "FORMAT('%s is %s', 'John', 30)" };
-        yield return new object[] { "format_no_args", "\"hello\".format([])", "FORMAT('hello')" };
-        yield return new object[] { "format_double_percent", "\"100%% sure\".format([])", "FORMAT('100%% sure')" };
+        yield return new object[] { "format_string_int", "\"%s is %d\".format([\"John\", 30])", TestDialects.PostgreSql, "FORMAT('%s is %s', 'John', 30)" };
+        yield return new object[] { "format_string_int", "\"%s is %d\".format([\"John\", 30])", TestDialects.BigQuery, "FORMAT('%s is %d', 'John', 30)" };
+        yield return new object[] { "format_string_int", "\"%s is %d\".format([\"John\", 30])", TestDialects.Sqlite, "printf('%s is %d', 'John', 30)" };
+        yield return new object[] { "format_string_int", "\"%s is %d\".format([\"John\", 30])", TestDialects.DuckDb, "printf('%s is %d', 'John', 30)" };
+        yield return new object[] { "format_string_int", "\"%s is %d\".format([\"John\", 30])", TestDialects.Spark, "format_string('%s is %d', 'John', 30)" };
+        yield return new object[] { "format_no_args", "\"hello\".format([])", TestDialects.PostgreSql, "FORMAT('hello')" };
+        yield return new object[] { "format_double_percent", "\"100%% sure\".format([])", TestDialects.PostgreSql, "FORMAT('100%% sure')" };
     }
 
     [Theory]
     [MemberData(nameof(FormatCases))]
-    public void TestFormat(string name, string celExpr, string expectedSql)
+    public void TestFormat(string name, string celExpr, string dialectName, string expectedSql)
     {
         var ast = CelTestEnv.Compile(FormatEnv(), celExpr);
-        var sql = Cel2SqlConverter.Convert(ast, o => o.WithDialect(PG));
-        sql.Should().Be(expectedSql, "{0}", name);
+        var sql = Cel2SqlConverter.Convert(ast, o => o.WithDialect(TestDialects.Get(dialectName)));
+        sql.Should().Be(expectedSql, "{0} [{1}]", name, dialectName);
+    }
+
+    [Fact]
+    public void Format_MysqlIsExplicitlyUnsupported()
+    {
+        var ast = CelTestEnv.Compile(FormatEnv(), "\"%s\".format([\"x\"])");
+        var act = () => Cel2SqlConverter.Convert(ast, o => o.WithDialect(TestDialects.Get(TestDialects.MySql)));
+        act.Should().Throw<ConversionException>();
     }
 
     [Fact]

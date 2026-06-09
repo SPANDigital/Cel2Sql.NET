@@ -1,4 +1,9 @@
+using Cel2Sql.Dialects.BigQuery;
+using Cel2Sql.Dialects.DuckDb;
+using Cel2Sql.Dialects.MySql;
 using Cel2Sql.Dialects.Postgres;
+using Cel2Sql.Dialects.Spark;
+using Cel2Sql.Dialects.Sqlite;
 using FluentAssertions;
 using Xunit;
 
@@ -6,7 +11,7 @@ namespace Cel2Sql.Tests;
 
 /// <summary>
 /// Tests for the query analysis and index recommendation feature.
-/// Mirrors Cel2SqlAnalyzeTest.java (PostgreSQL rows only).
+/// Mirrors Cel2SqlAnalyzeTest.java.
 /// </summary>
 public class Cel2SqlAnalyzeTest
 {
@@ -36,6 +41,60 @@ public class Cel2SqlAnalyzeTest
         rec.Column.Should().Be("name");
         rec.IndexType.Should().Be("GIN");
         rec.Expression.Should().Contain("gin_trgm_ops");
+    }
+
+    [Fact]
+    public void MysqlComparisonIndex()
+    {
+        var ast = CelTestEnv.Compile("age == 25");
+        var result = Cel2SqlConverter.AnalyzeQuery(ast, o => o.WithDialect(new MySqlDialect()));
+
+        result.Recommendations.Should().HaveCount(1);
+        var rec = result.Recommendations[0];
+        rec.IndexType.Should().Be("BTREE");
+    }
+
+    [Fact]
+    public void DuckdbComparisonIndex()
+    {
+        var ast = CelTestEnv.Compile("age < 30");
+        var result = Cel2SqlConverter.AnalyzeQuery(ast, o => o.WithDialect(new DuckDbDialect()));
+
+        result.Recommendations.Should().HaveCount(1);
+        var rec = result.Recommendations[0];
+        rec.IndexType.Should().Be("ART");
+    }
+
+    [Fact]
+    public void BigqueryComparisonIndex()
+    {
+        var ast = CelTestEnv.Compile("age >= 18");
+        var result = Cel2SqlConverter.AnalyzeQuery(ast, o => o.WithDialect(new BigQueryDialect()));
+
+        result.Recommendations.Should().HaveCount(1);
+        var rec = result.Recommendations[0];
+        rec.IndexType.Should().Be("CLUSTERING");
+    }
+
+    [Fact]
+    public void SqliteComparisonIndex()
+    {
+        var ast = CelTestEnv.Compile("name == \"test\"");
+        var result = Cel2SqlConverter.AnalyzeQuery(ast, o => o.WithDialect(new SqliteDialect()));
+
+        result.Recommendations.Should().HaveCount(1);
+        var rec = result.Recommendations[0];
+        rec.IndexType.Should().Be("BTREE");
+    }
+
+    [Fact]
+    public void SparkReturnsEmptyRecommendations()
+    {
+        // Spark indexing is storage-layer specific; analyzeQuery returns no recommendations.
+        var ast = CelTestEnv.Compile("name == \"a\" && age > 20");
+        var result = Cel2SqlConverter.AnalyzeQuery(ast, o => o.WithDialect(new SparkDialect()));
+
+        result.Recommendations.Should().BeEmpty();
     }
 
     [Fact]
