@@ -20,12 +20,6 @@ public sealed class SqliteDialect : DialectBase, IIndexAdvisor
 
     // --- Literals ---
 
-    public override void WriteStringLiteral(StringBuilder w, string value)
-    {
-        string escaped = value.Replace("'", "''");
-        w.Append('\'').Append(escaped).Append('\'');
-    }
-
     public override void WriteBytesLiteral(StringBuilder w, byte[] value)
     {
         w.Append("X'");
@@ -39,13 +33,6 @@ public sealed class SqliteDialect : DialectBase, IIndexAdvisor
     }
 
     // --- Operators ---
-
-    public override void WriteStringConcat(StringBuilder w, SqlWriter writeLhs, SqlWriter writeRhs)
-    {
-        writeLhs();
-        w.Append(" || ");
-        writeRhs();
-    }
 
     public override void WriteRegexMatch(StringBuilder w, SqlWriter writeTarget, string pattern, bool caseInsensitive)
     {
@@ -338,11 +325,6 @@ public sealed class SqliteDialect : DialectBase, IIndexAdvisor
     public override void WriteStructOpen(StringBuilder w)
     {
         w.Append("json_object(");
-    }
-
-    public override void WriteStructClose(StringBuilder w)
-    {
-        w.Append(')');
     }
 
     // --- Validation ---

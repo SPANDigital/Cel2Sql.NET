@@ -20,12 +20,6 @@ public sealed class MySqlDialect : DialectBase, IIndexAdvisor
 
     // --- Literals ---
 
-    public override void WriteStringLiteral(StringBuilder w, string value)
-    {
-        string escaped = value.Replace("'", "''");
-        w.Append('\'').Append(escaped).Append('\'');
-    }
-
     public override void WriteBytesLiteral(StringBuilder w, byte[] value)
     {
         w.Append("X'");
@@ -230,18 +224,6 @@ public sealed class MySqlDialect : DialectBase, IIndexAdvisor
 
     // --- Timestamps ---
 
-    public override void WriteDuration(StringBuilder w, long value, string unit)
-    {
-        w.Append("INTERVAL ").Append(value).Append(' ').Append(unit);
-    }
-
-    public override void WriteInterval(StringBuilder w, SqlWriter writeValue, string unit)
-    {
-        w.Append("INTERVAL ");
-        writeValue();
-        w.Append(' ').Append(unit);
-    }
-
     public override void WriteExtract(StringBuilder w, string part, SqlWriter writeExpr, SqlWriter writeTz)
     {
         bool isDow = "DOW".Equals(part, StringComparison.Ordinal);
@@ -267,13 +249,6 @@ public sealed class MySqlDialect : DialectBase, IIndexAdvisor
             }
             w.Append(')');
         }
-    }
-
-    public override void WriteTimestampArithmetic(StringBuilder w, string op, SqlWriter writeTs, SqlWriter writeDur)
-    {
-        writeTs();
-        w.Append(' ').Append(op).Append(' ');
-        writeDur();
     }
 
     // --- String Functions ---
@@ -340,11 +315,6 @@ public sealed class MySqlDialect : DialectBase, IIndexAdvisor
     public override void WriteStructOpen(StringBuilder w)
     {
         w.Append("ROW(");
-    }
-
-    public override void WriteStructClose(StringBuilder w)
-    {
-        w.Append(')');
     }
 
     // --- Validation ---
