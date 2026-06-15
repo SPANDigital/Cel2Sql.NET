@@ -4,7 +4,7 @@ using Cel2Sql.Dialects.MySql;
 using Cel2Sql.Dialects.Postgres;
 using Cel2Sql.Dialects.Spark;
 using Cel2Sql.Dialects.Sqlite;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace Cel2Sql.Tests;

@@ -2,7 +2,7 @@ using System.Text;
 using Cel2Sql.Dialects;
 using Cel2Sql.Dialects.Spark;
 using Cel2Sql.Errors;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace Cel2Sql.Tests;
