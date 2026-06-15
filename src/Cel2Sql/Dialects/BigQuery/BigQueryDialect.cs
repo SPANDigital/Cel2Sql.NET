@@ -43,13 +43,6 @@ public sealed class BigQueryDialect : DialectBase, IIndexAdvisor
 
     // --- Operators ---
 
-    public override void WriteStringConcat(StringBuilder w, SqlWriter writeLhs, SqlWriter writeRhs)
-    {
-        writeLhs();
-        w.Append(" || ");
-        writeRhs();
-    }
-
     public override void WriteRegexMatch(StringBuilder w, SqlWriter writeTarget, string pattern, bool caseInsensitive)
     {
         w.Append("REGEXP_CONTAINS(");
@@ -231,18 +224,6 @@ public sealed class BigQueryDialect : DialectBase, IIndexAdvisor
 
     // --- Timestamps ---
 
-    public override void WriteDuration(StringBuilder w, long value, string unit)
-    {
-        w.Append("INTERVAL ").Append(value).Append(' ').Append(unit);
-    }
-
-    public override void WriteInterval(StringBuilder w, SqlWriter writeValue, string unit)
-    {
-        w.Append("INTERVAL ");
-        writeValue();
-        w.Append(' ').Append(unit);
-    }
-
     public override void WriteExtract(StringBuilder w, string part, SqlWriter writeExpr, SqlWriter writeTz)
     {
         bool isDow = "DOW".Equals(part, StringComparison.Ordinal);
@@ -368,11 +349,6 @@ public sealed class BigQueryDialect : DialectBase, IIndexAdvisor
     public override void WriteStructOpen(StringBuilder w)
     {
         w.Append("STRUCT(");
-    }
-
-    public override void WriteStructClose(StringBuilder w)
-    {
-        w.Append(')');
     }
 
     // --- Validation ---
