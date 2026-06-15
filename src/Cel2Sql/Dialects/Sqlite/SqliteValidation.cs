@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.RegularExpressions;
 using Cel2Sql.Errors;
 
 namespace Cel2Sql.Dialects.Sqlite;
@@ -10,8 +9,6 @@ namespace Cel2Sql.Dialects.Sqlite;
 /// </summary>
 internal static class SqliteValidation
 {
-    /// <summary>Pattern for valid SQLite identifiers: starts with letter or underscore, then alphanumeric or underscore.</summary>
-    private static readonly Regex FieldNamePattern = new("^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
 
     /// <summary>
     /// Set of SQLite reserved SQL keywords (lowercased).
@@ -175,27 +172,7 @@ internal static class SqliteValidation
     /// If the field name is empty, contains invalid characters, or is a reserved keyword.
     /// </exception>
     internal static void ValidateFieldName(string? name)
-    {
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ConversionException("field name cannot be empty",
-                "field name cannot be empty");
-        }
-        if (!FieldNamePattern.IsMatch(name))
-        {
-            string detail = string.Format(CultureInfo.InvariantCulture,
-                "field name \"{0}\" must start with a letter or underscore and contain only alphanumeric characters and underscores",
-                name);
-            throw new ConversionException("Invalid field name", detail);
-        }
-        if (ReservedSqlKeywords.Contains(name.ToLowerInvariant()))
-        {
-            string detail = string.Format(CultureInfo.InvariantCulture,
-                "field name \"{0}\" is a reserved SQL keyword and cannot be used without quoting",
-                name);
-            throw new ConversionException("Invalid field name", detail);
-        }
-    }
+        => FieldNameValidator.Validate(name, "SQLite", 0, ReservedSqlKeywords);
 
     /// <summary>
     /// Returns the set of reserved SQL keywords for SQLite.
