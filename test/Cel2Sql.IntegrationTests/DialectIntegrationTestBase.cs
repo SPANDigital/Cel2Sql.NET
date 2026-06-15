@@ -1,7 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using Cel2Sql.Dialects;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Cel2Sql.IntegrationTests;
 

@@ -2,7 +2,7 @@ using Cel2Sql.Cel;
 using Cel2Sql.Dialects.BigQuery;
 using Cel2Sql.Dialects.Postgres;
 using Cel2Sql.Errors;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace Cel2Sql.Tests;
