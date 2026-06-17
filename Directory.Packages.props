@@ -9,7 +9,7 @@
     <!-- CEL parser/checker (port of cel-java). Pinned: the adapter depends on its AST shape. -->
     <PackageVersion Include="Cel.NET" Version="1.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.300" />
   </ItemGroup>
 
   <ItemGroup>
