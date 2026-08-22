@@ -51,7 +51,7 @@ public static class IntegrationCatalog
         // --- Arrays: native (skip MySQL/SQLite) ---
         IntegrationTestCase.Expr("array_index_literal", "[1, 2, 3][0] == 1", "array_native"),
 
-        // --- Comprehensions (skip MySQL, skip SQLite) ---
+        // --- Comprehensions ---
         IntegrationTestCase.Where("comp_all", "string_list.all(x, x != \"bad\")", "comprehension", 2, 4, 6),
         IntegrationTestCase.Where("comp_exists", "string_list.exists(x, x == \"good\")", "comprehension", 1, 2, 4, 5),
         IntegrationTestCase.Where("comp_exists_one", "string_list.exists_one(x, x == \"unique\")", "comprehension", 4, 5),
@@ -86,7 +86,6 @@ public static class IntegrationCatalog
         {
             "regex" => dialect.SupportsRegex,
             "array_native" => dialect.SupportsNativeArrays,
-            "comprehension" => dialect.Name != DialectName.MySql,
             _ => true,
         };
     }

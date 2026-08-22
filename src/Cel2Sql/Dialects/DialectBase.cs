@@ -109,4 +109,20 @@ public abstract class DialectBase : IDialect
         WriteUnnest(w, writeSource);
         w.Append(" AS ").Append(iterVar);
     }
+
+    /// <summary>Default existential wrapper: <c>EXISTS (SELECT 1 FROM &lt;body&gt;)</c>.</summary>
+    public virtual void WriteComprehensionExists(StringBuilder w, SqlWriter writeBody)
+    {
+        w.Append("EXISTS (SELECT 1 FROM ");
+        writeBody();
+        w.Append(')');
+    }
+
+    /// <summary>Default negated existential wrapper: <c>NOT EXISTS (SELECT 1 FROM &lt;body&gt;)</c>.</summary>
+    public virtual void WriteComprehensionNotExists(StringBuilder w, SqlWriter writeBody)
+    {
+        w.Append("NOT EXISTS (SELECT 1 FROM ");
+        writeBody();
+        w.Append(')');
+    }
 }

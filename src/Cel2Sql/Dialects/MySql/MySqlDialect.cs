@@ -300,6 +300,37 @@ public sealed class MySqlDialect : DialectBase, IIndexAdvisor
         w.Append(", '$[*]' COLUMNS(value TEXT PATH '$'))");
     }
 
+    /// <summary>
+    /// JSON_TABLE is table-valued, so the value column is renamed to iterVar
+    /// through a derived table (JSON_TABLE itself requires an alias).
+    /// </summary>
+    public override void WriteComprehensionSource(StringBuilder w, SqlWriter writeSource, string iterVar)
+    {
+        w.Append("(SELECT value AS ").Append(iterVar).Append(" FROM ");
+        WriteUnnest(w, writeSource);
+        w.Append(" AS jt) AS _t");
+    }
+
+    /// <summary>
+    /// Not EXISTS: the MySQL 8.x optimizer turns a correlated EXISTS into a
+    /// semijoin and loses the correlation to JSON_TABLE, silently matching
+    /// nothing (works from 9.x). COUNT comparisons are never transformed.
+    /// </summary>
+    public override void WriteComprehensionExists(StringBuilder w, SqlWriter writeBody)
+    {
+        w.Append("(SELECT COUNT(*) FROM ");
+        writeBody();
+        w.Append(") > 0");
+    }
+
+    /// <inheritdoc cref="WriteComprehensionExists" />
+    public override void WriteComprehensionNotExists(StringBuilder w, SqlWriter writeBody)
+    {
+        w.Append("(SELECT COUNT(*) FROM ");
+        writeBody();
+        w.Append(") = 0");
+    }
+
     public override void WriteArraySubqueryOpen(StringBuilder w)
     {
         w.Append("(SELECT JSON_ARRAYAGG(");
