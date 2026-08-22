@@ -2397,11 +2397,13 @@ internal sealed class Converter
         string iterVar = comp.IterVar;
         CelExprNode predicate = ExtractComprehensionPredicate(comp.LoopCondition, comp.LoopStep);
 
-        _str.Append("NOT EXISTS (SELECT 1 FROM ");
-        _dialect.WriteComprehensionSource(_str, () => Visit(iterRange), iterVar);
-        _str.Append(" WHERE NOT (");
-        Visit(predicate);
-        _str.Append("))");
+        _dialect.WriteComprehensionNotExists(_str, () =>
+        {
+            _dialect.WriteComprehensionSource(_str, () => Visit(iterRange), iterVar);
+            _str.Append(" WHERE NOT (");
+            Visit(predicate);
+            _str.Append(')');
+        });
     }
 
     /// <summary>
@@ -2414,11 +2416,12 @@ internal sealed class Converter
         string iterVar = comp.IterVar;
         CelExprNode predicate = ExtractComprehensionPredicate(comp.LoopCondition, comp.LoopStep);
 
-        _str.Append("EXISTS (SELECT 1 FROM ");
-        _dialect.WriteComprehensionSource(_str, () => Visit(iterRange), iterVar);
-        _str.Append(" WHERE ");
-        Visit(predicate);
-        _str.Append(')');
+        _dialect.WriteComprehensionExists(_str, () =>
+        {
+            _dialect.WriteComprehensionSource(_str, () => Visit(iterRange), iterVar);
+            _str.Append(" WHERE ");
+            Visit(predicate);
+        });
     }
 
     /// <summary>

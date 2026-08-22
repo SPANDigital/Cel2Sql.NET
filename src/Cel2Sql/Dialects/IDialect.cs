@@ -142,6 +142,17 @@ public interface IDialect
     /// </summary>
     void WriteComprehensionSource(StringBuilder w, SqlWriter writeSource, string iterVar);
 
+    /// <summary>
+    /// Wraps a comprehension's existential subquery: <c>EXISTS (SELECT 1 FROM &lt;body&gt;)</c>.
+    /// MySQL overrides this with a COUNT comparison because its 8.x optimizer turns a
+    /// correlated EXISTS into a semijoin and loses the correlation to a JSON_TABLE source,
+    /// silently matching nothing.
+    /// </summary>
+    void WriteComprehensionExists(StringBuilder w, SqlWriter writeBody);
+
+    /// <summary>Negation of <see cref="WriteComprehensionExists"/>: <c>NOT EXISTS (SELECT 1 FROM &lt;body&gt;)</c>.</summary>
+    void WriteComprehensionNotExists(StringBuilder w, SqlWriter writeBody);
+
     /// <summary>Writes the prefix before the transform expression in an array-building subquery.</summary>
     void WriteArraySubqueryOpen(StringBuilder w);
 
