@@ -26,7 +26,7 @@
     <PackageVersion Include="Testcontainers.MySql" Version="4.12.0" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="MySqlConnector" Version="2.6.0" />
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.11" />
     <PackageVersion Include="DuckDB.NET.Data.Full" Version="1.5.3" />
   </ItemGroup>
 
